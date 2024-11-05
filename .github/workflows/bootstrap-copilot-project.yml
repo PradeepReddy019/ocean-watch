@@ -94,6 +94,9 @@ jobs:
   create-copilot-staging-environment:
     needs: [ init-copilot ]
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Download Copilot CLI from Artifacts
         uses: actions/download-artifact@v4
