@@ -135,7 +135,7 @@ jobs:
         id: init-environment
         if: env.environment_exists == 'false'
         run: |
-          if ! copilot env init --name staging --app ocean-watch --default-config --region ${{ secrets.AWS_REGION }} --aws-session-token ${{ steps.creds.outputs.aws-session-token }}; then
+          if ! copilot env init --name staging --app ocean-watch --default-config --region ${{ secrets.AWS_REGION }}; then
             echo "Failed to initialize environment."
             exit 1
           fi
