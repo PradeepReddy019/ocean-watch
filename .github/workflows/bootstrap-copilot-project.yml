@@ -9,7 +9,7 @@ jobs:
     steps:
       - name: Check if on main branch
         run: |
-          if [[ "${{ github.ref }}" == 'refs/heads/main' ]]; then
+          if [[ "${{ github.ref }}" == 'refs/heads/dev' ]]; then
             echo "This workflow cannot be run on the main branch."
             exit 1
           fi
