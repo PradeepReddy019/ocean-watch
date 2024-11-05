@@ -50,7 +50,7 @@ jobs:
         run: chmod +x /usr/local/bin/copilot
 
       - name: Configure AWS Credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHub_Action_Role
           aws-region: us-east-1
