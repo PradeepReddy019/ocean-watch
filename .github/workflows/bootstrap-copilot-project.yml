@@ -140,6 +140,12 @@ jobs:
             exit 1
           fi
 
+      - name: Deploy environment to staging
+        run: |
+          copilot env deploy --name staging
+          copilot svc deploy --name ocean-watch --env staging
+
+
       - name: Commit AWS Copilot Staging Config
         if: env.environment_exists == 'false'
         run: |
