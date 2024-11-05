@@ -112,8 +112,7 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHub_Action_Role
           aws-region: us-east-1
-          role-duration-seconds: 1800
-          output-credentials: true
+          audience: sts.amazonaws.com
 
       - name: Checkout Repository
         uses: actions/checkout@v4
