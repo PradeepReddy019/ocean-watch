@@ -150,9 +150,11 @@ jobs:
             echo "Service ocean-watch already exists."
           fi
 
+          cd copilot/ocean-watch
+
           # Deploy to the staging environment
-          copilot env deploy --name staging
-          copilot svc deploy --name ocean-watch --env staging
+          copilot env deploy --name staging --force
+          copilot svc deploy --name ocean-watch --env staging --force
 
 
       - name: Commit AWS Copilot Staging Config
