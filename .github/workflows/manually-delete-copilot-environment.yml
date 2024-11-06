@@ -34,6 +34,9 @@ jobs:
 
   destroy-review-app-environment:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     needs: setup-copilot
     steps:
       - name: Download Copilot CLI from Artifacts
