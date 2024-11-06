@@ -10,6 +10,9 @@ on:
 jobs:
   setup-copilot:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     outputs:
       copilot-path: ${{ steps.setup.outputs.copilot-path }}
     steps:
@@ -42,14 +45,12 @@ jobs:
       - name: Ensure Copilot is executable
         run: chmod +x /usr/local/bin/copilot
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Configure AWS Credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ocean-watch-deployer
-          role-duration-seconds: 1800
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHub_Action_Role
+          aws-region: us-east-1
+          audience: sts.amazonaws.com
 
       - name: Delete AWS Secret
         run: |
@@ -87,5 +88,5 @@ jobs:
       - name: Destroy Review App Environment
         if: env.environment_exists == 'true'
         run: |
-          copilot svc delete --name nextjs-app --env "${{ github.event.inputs.branch_name }}" --yes
+          copilot svc delete --name ocean-watch --env "${{ github.event.inputs.branch_name }}" --yes
           copilot env delete --name "${{ github.event.inputs.branch_name }}" --yes
