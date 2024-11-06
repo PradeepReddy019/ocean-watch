@@ -55,20 +55,27 @@ jobs:
         run: git pull origin ${{ github.head_ref }} 
 
       # Step 4: Run Copilot commands
-      - name: Initialize and deploy using AWS Copilot
+      - name: Initialize Application and Environment
         env:
-          AWS_REGION: us-east-1  # Set your AWS region
+          AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
-          # Initialize a new environment (only needed if not done already)
-          copilot env init --name test-env --region {{ secrets.AWS_REGION }} --default-config
-          
-          # Initialize a new application (only needed if not done already)
+          # Initialize the application (creates necessary infrastructure)
+          copilot app init ocean-watch || echo "Application already exists"
+
+          # Initialize the environment with default settings
+          copilot env init --name test-env --app ocean-watch --region $AWS_REGION --default-config
+
+      - name: Initialize and Deploy Service
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          # Initialize a new service within the app
           copilot init --app ocean-watch --svc ocean-service --type "Load Balanced Web Service" --deploy
 
-          # Deploy the application (run this on every change)
+          # Deploy the service to the environment
           copilot svc deploy --name ocean-service --env test-env
 
-          # Optional: Check service status
+          # Check the service status
           copilot svc status --name ocean-service --env test-env
 
       - name: Commit AWS Copilot Staging Config
