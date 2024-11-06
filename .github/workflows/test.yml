@@ -60,16 +60,16 @@ jobs:
           AWS_REGION: us-east-1  # Set your AWS region
         run: |
           # Initialize a new environment (only needed if not done already)
-          copilot env init --name test-env --region {{ secrets.AWS_REGION }}
+          copilot env init --name test-env --region {{ secrets.AWS_REGION }} --default-config --app ocean-watch
           
           # Initialize a new application (only needed if not done already)
-          copilot init --app my-app --svc yesy-svc --type "Load Balanced Web Service" --deploy
+          copilot init --app my-app --svc test-svc --type "Load Balanced Web Service" --deploy
 
           # Deploy the application (run this on every change)
           copilot svc deploy --name test-svc --env test-env
 
           # Optional: Check service status
-          copilot svc status --name test-svce --env test-env
+          copilot svc status --name test-svc --env test-env
 
       - name: Commit AWS Copilot Staging Config
         if: env.environment_exists == 'false'
