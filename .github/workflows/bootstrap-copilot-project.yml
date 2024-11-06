@@ -152,7 +152,7 @@ jobs:
 
           # Deploy to the staging environment
           copilot env deploy --name staging
-          # copilot svc deploy --name ocean-watch --env staging
+          copilot svc deploy --name ocean-watch --env staging
 
 
       - name: Commit AWS Copilot Staging Config
