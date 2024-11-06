@@ -142,8 +142,17 @@ jobs:
 
       - name: Deploy environment to staging
         run: |
-          copilot svc init --name ocean-watch --svc-type "Load Balanced Web Service"
+          # Check if the service already exists in the Copilot workspace
+          if ! copilot svc show --name ocean-watch > /dev/null 2>&1; then
+            echo "Service ocean-watch does not exist. Initializing..."
+            copilot svc init --name ocean-watch --svc-type "Load Balanced Web Service"
+          else
+            echo "Service ocean-watch already exists."
+          fi
+
+          # Deploy to the staging environment
           copilot env deploy --name staging
+          # copilot svc deploy --name ocean-watch --env staging
 
 
       - name: Commit AWS Copilot Staging Config
