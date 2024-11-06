@@ -122,6 +122,11 @@ jobs:
           aws-region: us-east-1
           audience: sts.amazonaws.com
 
+      # Build the Docker image (ensure a Dockerfile exists in your repository)
+      - name: Build Docker image
+        run: |
+          docker build -t my-app-image .
+
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -169,6 +174,12 @@ jobs:
           # Deploy the environment to staging
           echo "Deploying environment to staging..."
           copilot env deploy --name staging --force
+
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+
+          docker tag my-app-image:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/ocean-watch/ocean-watch:latest
+
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/ocean-watch/ocean-watch:latest
 
           # Deploy the service to the staging environment
           echo "Deploying service ocean-watch to staging..."
