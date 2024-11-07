@@ -98,10 +98,6 @@ jobs:
           git push origin HEAD:${{ github.ref }}  # Ensure you're pushing to the correct branch
         shell: bash
 
-      - name: Verify that manifest.yml exists
-        run: |
-          ls -al copilot/ocean-watch/manifest.yml
-
 
   create-copilot-staging-environment:
     needs: [ init-copilot ]
