@@ -2,6 +2,10 @@ name: Manual Boostrap of AWS Copilot Project
 
 on:
   workflow_dispatch:
+    inputs:
+      branch_name:
+        description: 'Feature Branch Name'
+        required: true
 
 jobs:
   branch-check:
@@ -125,68 +129,60 @@ jobs:
           aws-region: us-east-1
           audience: sts.amazonaws.com
 
-      # Build the Docker image (ensure a Dockerfile exists in your repository)
-      - name: Build Docker image
-        run: |
-          docker build -t my-app-image .
-
       - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Pull latest changes
         run: git pull origin ${{ github.head_ref }}  # Pull latest changes to ensure the local copy is up-to-date
 
-      - name: Check for existing Copilot Staging Environment
+      - name: Check for existing Copilot Environment
         id: check_environment
         run: |
-          if copilot env show --name staging --json; then
+          if copilot env show --name ${{ github.event.inputs.branch_name }} --json > /dev/null 2>&1; then
             echo "Environment exists."
             echo "environment_exists=true" >> $GITHUB_ENV
           else
             echo "Environment does not exist."
             echo "environment_exists=false" >> $GITHUB_ENV
-          fi
 
       - name: Initialize Staging Environment
         id: init-environment
         if: env.environment_exists == 'false'
         run: |
-          if ! copilot env init --name staging --app ocean-watch --default-config --region ${{ secrets.AWS_REGION }}; then
+          echo "Initializing environment ${{ github.event.inputs.branch_name }}..."
+          if ! copilot env init --name ${{ github.event.inputs.branch_name }} --app ocean-watch --default-config --region ${{ secrets.AWS_REGION }}; then
             echo "Failed to initialize environment."
-            exit 1
+          exit 1
           fi
 
-      - name: Deploy environment to staging
+      - name: Initialize Copilot Application (if not already initialized)
         run: |
-          # Make sure we're in the correct working directory for Copilot (root of the project)
           if [ ! -d "copilot" ]; then
-            echo "Copilot workspace not found! Initializing Copilot..."
+            echo "Copilot workspace not found! Initializing Copilot application..."
             copilot app init --name ocean-watch
           else
             echo "Copilot workspace exists."
           fi
 
-          # Check if the service already exists in the Copilot workspace
+      - name: Initialize Service in Copilot (if not already initialized)
+        run: |
           if ! copilot svc show --name ocean-watch > /dev/null 2>&1; then
             echo "Service ocean-watch does not exist. Initializing..."
-            copilot svc init --name ocean-watch --svc-type "Load Balanced Web Service"
+            copilot svc init --name ocean-watch --svc-type "Load Balanced Web Service" --dockerfile ./Dockerfile
           else
             echo "Service ocean-watch already exists."
           fi
 
-          # Deploy the environment to staging
-          echo "Deploying environment to staging..."
-          copilot env deploy --name staging --force
+      - name: Deploy environment to staging
+        run: |
+          echo "Deploying environment ${{ github.event.inputs.branch_name }} to staging..."
+          copilot env deploy --name ${{ github.event.inputs.branch_name }} --force
 
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
-
-          docker tag my-app-image:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/ocean-watch/ocean-watch:latest
-
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/ocean-watch/ocean-watch:latest
-
-          # Deploy the service to the staging environment
+      - name: Deploy service to staging
+        run: |
           echo "Deploying service ocean-watch to staging..."
-          copilot svc deploy --name ocean-watch --env staging --force
+          copilot svc deploy --name ocean-watch --env ${{ github.event.inputs.branch_name }} --force
+
 
 
       - name: Commit AWS Copilot Staging Config
