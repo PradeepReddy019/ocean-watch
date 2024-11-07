@@ -140,6 +140,7 @@ jobs:
           else
             echo "Environment does not exist."
             echo "environment_exists=false" >> $GITHUB_ENV
+          fi
 
       - name: Initialize Staging Environment
         id: init-environment
